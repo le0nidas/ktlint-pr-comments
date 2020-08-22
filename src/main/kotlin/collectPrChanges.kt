@@ -26,6 +26,7 @@ fun collectPrChanges(
     val event = createGithubEvent(args[ARGS_INDEX_EVENT_FILE_PATH], moshi) ?: throw Exception("")
     val changes = collectChanges(args[ARGS_INDEX_TOKEN], retrofit, event)
         .filterNot { file -> file.status == STATUS_REMOVED }
+        .filter { file -> file.filename.endsWith(".kt") }
 
     return CollectedChanges(changes.joinToString(" ") { file -> file.filename })
 }

@@ -23,6 +23,14 @@ class CollectPrChangesTest {
                                     "    \"status\": \"added\"\n" +
                                     "  },\n" +
                                     "  {\n" +
+                                    "    \"filename\": \"src/main/kotlin/Dockerfile\",\n" +
+                                    "    \"status\": \"added\"\n" +
+                                    "  },\n" +
+                                    "  {\n" +
+                                    "    \"filename\": \"src/main/kotlin/action.yml\",\n" +
+                                    "    \"status\": \"added\"\n" +
+                                    "  },\n" +
+                                    "  {\n" +
                                     "    \"filename\": \"src/main/kotlin/Main2.kt\",\n" +
                                     "    \"status\": \"added\"\n" +
                                     "  }\n" +
