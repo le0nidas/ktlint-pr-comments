@@ -188,6 +188,108 @@ class CollectPrChangesTest {
         )
     }
 
+    @Test fun `when there are no changed files it returns an empty string`() {
+        mockWebServer.dispatcher = object : Dispatcher() {
+            override fun dispatch(request: RecordedRequest): MockResponse {
+                return when (request.path) {
+                    "/repos/le0nidas/ktlint-playground/pulls/7/files?page=1" ->
+                        MockResponse().setBody(
+                            "[\n" +
+                                    "]"
+                        )
+                    else ->
+                        throw IllegalArgumentException("Unknown path: ${request.path}")
+                }
+            }
+        }
+        val pathToEventFile = CollectPrChangesTest::class.java.classLoader.getResource("event.json").path
+        val userToken = "abc1234"
+
+        val actual = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
+
+        assertThat(
+            actual,
+            equalTo(Pair(0, ""))
+        )
+    }
+
+    @Test fun `when there are no kt files changed it returns an empty string`() {
+        mockWebServer.dispatcher = object : Dispatcher() {
+            override fun dispatch(request: RecordedRequest): MockResponse {
+                return when (request.path) {
+                    "/repos/le0nidas/ktlint-playground/pulls/7/files?page=1" ->
+                        MockResponse().setBody(
+                            "[\n" +
+                                    "  {\n" +
+                                    "    \"filename\": \"src/main/kotlin/Dockerfile\",\n" +
+                                    "    \"status\": \"added\"\n" +
+                                    "  },\n" +
+                                    "  {\n" +
+                                    "    \"filename\": \"src/main/kotlin/action.yml\",\n" +
+                                    "    \"status\": \"added\"\n" +
+                                    "  }\n" +
+                                    "]"
+                        )
+                    "/repos/le0nidas/ktlint-playground/pulls/7/files?page=2" ->
+                        MockResponse().setBody(
+                            "[\n" +
+                                    "]"
+                        )
+                    else ->
+                        throw IllegalArgumentException("Unknown path: ${request.path}")
+                }
+            }
+        }
+        val pathToEventFile = CollectPrChangesTest::class.java.classLoader.getResource("event.json").path
+        val userToken = "abc1234"
+
+        val actual = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
+
+        assertThat(
+            actual,
+            equalTo(Pair(0, ""))
+        )
+    }
+
+    @Test fun `when there is an error while getting the github event it returns the error's message`() {
+        val pathToEventFile = CollectPrChangesTest::class.java.classLoader.getResource("not-correct-event.json").path
+        val userToken = "abc1234"
+
+        val actual = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
+
+        assertThat(
+            actual,
+            equalTo(Pair(-1, "Error while getting the event: Required value 'pull_request' missing at \$"))
+        )
+    }
+
+    @Test fun `when there is an error while getting the changes from github it returns the error's message`() {
+        mockWebServer.dispatcher = object : Dispatcher() {
+            override fun dispatch(request: RecordedRequest): MockResponse {
+                return when (request.path) {
+                    "/repos/le0nidas/ktlint-playground/pulls/7/files?page=1" ->
+                        MockResponse().setBody(
+                            "{\n" +
+                                    "  \"message\": \"Bad credentials\",\n" +
+                                    "  \"documentation_url\": \"https://docs.github.com/rest\"\n" +
+                                    "}\n"
+                        )
+                    else ->
+                        throw IllegalArgumentException("Unknown path: ${request.path}")
+                }
+            }
+        }
+        val pathToEventFile = CollectPrChangesTest::class.java.classLoader.getResource("event.json").path
+        val userToken = "abc1234"
+
+        val actual = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
+
+        assertThat(
+            actual,
+            equalTo(Pair(-1, "Error while getting the changes: Expected BEGIN_ARRAY but was BEGIN_OBJECT at path \$"))
+        )
+    }
+
     lateinit var mockWebServer: MockWebServer
 
     @BeforeEach

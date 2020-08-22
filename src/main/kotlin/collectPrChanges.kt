@@ -23,15 +23,27 @@ fun collectPrChanges(
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
 
-    val event = createGithubEvent(args[ARGS_INDEX_EVENT_FILE_PATH], moshi) ?: throw Exception("")
-    val changes = collectChanges(args[ARGS_INDEX_TOKEN], retrofit, event)
-        .filterNot { file -> file.status == STATUS_REMOVED }
-        .filter { file -> file.filename.endsWith(".kt") }
-
-    return Pair(EXIT_CODE_SUCCESS, changes.joinToString(" ") { file -> file.filename })
+    var failedOnEvent = true
+    return try {
+        val event = createGithubEvent(args[ARGS_INDEX_EVENT_FILE_PATH], moshi)
+            .also { failedOnEvent = false }
+        val changes = collectChanges(args[ARGS_INDEX_TOKEN], retrofit, event)
+            .filterNot { file -> file.status == STATUS_REMOVED }
+            .filter { file -> file.filename.endsWith(".kt") }
+        Pair(EXIT_CODE_SUCCESS, changes.joinToString(" ") { file -> file.filename })
+    } catch (ex: Throwable) {
+        val prefix = if (failedOnEvent)
+            "Error while getting the event" else
+            "Error while getting the changes"
+        val errorMessage = if (ex.message.isNullOrBlank())
+            "Unknown error: ${ex.javaClass.name}" else
+            ex.message
+        Pair(EXIT_CODE_FAILURE, "$prefix: $errorMessage")
+    }
 }
 
 private const val EXIT_CODE_SUCCESS = 0
+private const val EXIT_CODE_FAILURE = -1
 private const val ARGS_INDEX_EVENT_FILE_PATH = 0
 private const val ARGS_INDEX_TOKEN = 1
 private const val STATUS_REMOVED = "removed"
@@ -39,12 +51,13 @@ private const val STATUS_REMOVED = "removed"
 private fun createGithubEvent(
     eventFilePath: String,
     moshi: Moshi
-): GithubEvent? {
+): GithubEvent {
 
     val json = File(eventFilePath).readText()
     return moshi
         .adapter(GithubEvent::class.java)
         .fromJson(json)
+        ?: throw Exception("Could not create json from file: $eventFilePath")
 }
 
 private fun collectChanges(
