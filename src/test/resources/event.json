@@ -1,0 +1,15 @@
+{
+  "action": "synchronize",
+  "pull_request": {
+    "number": 7,
+    "state": "open",
+    "title": "yapl",
+    "url": "https://api.github.com/repos/le0nidas/ktlint-playground/pulls/7",
+    "user": {
+      "login": "le0nidas"
+    }
+  },
+  "repository": {
+    "name": "ktlint-playground"
+  }
+}
