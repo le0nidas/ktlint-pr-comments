@@ -25,12 +25,12 @@ fun collectPrChanges(
 
     var failedOnEvent = true
     return try {
-        val event = createGithubEvent(args[ARGS_INDEX_EVENT_FILE_PATH], moshi)
+        val event = createGithubEvent(args[Constants.ARGS_INDEX_EVENT_FILE_PATH], moshi)
             .also { failedOnEvent = false }
-        val changes = collectChanges(args[ARGS_INDEX_TOKEN], retrofit, event)
-            .filterNot { file -> file.status == STATUS_REMOVED }
+        val changes = collectChanges(args[Constants.ARGS_INDEX_TOKEN], retrofit, event)
+            .filterNot { file -> file.status == Constants.STATUS_REMOVED }
             .filter { file -> file.filename.endsWith(".kt") }
-        Pair(EXIT_CODE_SUCCESS, changes.joinToString(" ") { file -> file.filename })
+        Pair(Constants.EXIT_CODE_SUCCESS, changes.joinToString(" ") { file -> file.filename })
     } catch (ex: Throwable) {
         val prefix = if (failedOnEvent)
             "Error while getting the event" else
@@ -38,17 +38,20 @@ fun collectPrChanges(
         val errorMessage = if (ex.message.isNullOrBlank())
             "Unknown error: ${ex.javaClass.name}" else
             ex.message
-        Pair(EXIT_CODE_FAILURE, "$prefix: $errorMessage")
+        Pair(Constants.EXIT_CODE_FAILURE, "$prefix: $errorMessage")
     }
 }
 
-private const val EXIT_CODE_SUCCESS = 0
-private const val EXIT_CODE_FAILURE = -1
-private const val ARGS_INDEX_EVENT_FILE_PATH = 0
-private const val ARGS_INDEX_TOKEN = 1
-private const val STATUS_REMOVED = "removed"
+private object Constants {
+    const val EXIT_CODE_SUCCESS = 0
+    const val EXIT_CODE_FAILURE = -1
+    const val ARGS_INDEX_EVENT_FILE_PATH = 0
+    const val ARGS_INDEX_TOKEN = 1
+    const val STATUS_REMOVED = "removed"
+}
 
-private fun createGithubEvent(
+// create github event:
+fun createGithubEvent(
     eventFilePath: String,
     moshi: Moshi
 ): GithubEvent {
@@ -60,7 +63,14 @@ private fun createGithubEvent(
         ?: throw Exception("Could not create json from file: $eventFilePath")
 }
 
-private fun collectChanges(
+class GithubUser(val login: String)
+class GithubRepository(val name: String)
+class GithubPullRequest(val number: Int, val user: GithubUser)
+data class GithubEvent(val pull_request: GithubPullRequest, val repository: GithubRepository)
+//----------------------
+
+// collect changes from github:
+fun collectChanges(
     token: String,
     retrofit: Retrofit,
     event: GithubEvent
@@ -72,7 +82,7 @@ private fun collectChanges(
         .collectAllPrChanges(token, event, startingPage)
 }
 
-private fun GithubService.collectAllPrChanges(
+fun GithubService.collectAllPrChanges(
     token: String,
     event: GithubEvent,
     startingPage: Int
@@ -85,7 +95,7 @@ private fun GithubService.collectAllPrChanges(
     return changesFromCurrentPage + changesFromNextPage
 }
 
-private fun GithubService.executeGetPullRequestFiles(
+fun GithubService.executeGetPullRequestFiles(
     token: String,
     event: GithubEvent,
     startingPage: Int
@@ -104,14 +114,7 @@ private fun GithubService.executeGetPullRequestFiles(
         ?: emptyList()
 }
 
-// event
-private class GithubUser(val login: String)
-private class GithubRepository(val name: String)
-private class GithubPullRequest(val number: Int, val user: GithubUser)
-private data class GithubEvent(val pull_request: GithubPullRequest, val repository: GithubRepository)
-
-// changes
-private interface GithubService {
+interface GithubService {
     @GET("/repos/{owner}/{repo}/pulls/{pull_number}/files")
     fun getPullRequestFiles(
         @Header("Authorization") token: String,
@@ -122,4 +125,5 @@ private interface GithubService {
     ): Call<List<GithubChangedFile>>
 }
 
-private class GithubChangedFile(val filename: String, val status: String)
+class GithubChangedFile(val filename: String, val status: String)
+//------------------------------

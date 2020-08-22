@@ -18,6 +18,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.6.2")
     testImplementation("com.natpryce:hamkrest:1.7.0.3")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.8.1")
+    implementation(kotlin("script-runtime"))
 }
 tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "1.8"
