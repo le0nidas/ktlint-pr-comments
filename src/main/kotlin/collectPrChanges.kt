@@ -8,7 +8,6 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Path
 import retrofit2.http.Query
-import java.io.File
 
 fun collectPrChanges(
     args: Array<String>,
@@ -49,25 +48,6 @@ private object Constants {
     const val ARGS_INDEX_TOKEN = 1
     const val STATUS_REMOVED = "removed"
 }
-
-// create github event:
-fun createGithubEvent(
-    eventFilePath: String,
-    moshi: Moshi
-): GithubEvent {
-
-    val json = File(eventFilePath).readText()
-    return moshi
-        .adapter(GithubEvent::class.java)
-        .fromJson(json)
-        ?: throw Exception("Could not create json from file: $eventFilePath")
-}
-
-class GithubUser(val login: String)
-class GithubRepository(val name: String)
-class GithubPullRequest(val number: Int, val user: GithubUser)
-data class GithubEvent(val pull_request: GithubPullRequest, val repository: GithubRepository)
-//----------------------
 
 // collect changes from github:
 fun collectChanges(

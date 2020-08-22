@@ -6,6 +6,7 @@ import kotlin.system.exitProcess
 //DEPS com.squareup.retrofit2:converter-moshi:2.9.0
 
 //INCLUDE collectPrChanges.kt
+//INCLUDE createGithubEvent.kt
 
 val result = collectPrChanges(args)
 
