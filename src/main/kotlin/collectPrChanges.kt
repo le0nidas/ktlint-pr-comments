@@ -31,14 +31,41 @@ fun collectPrChanges(
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
         .create(GithubService::class.java)
-        .getPullRequestFiles("token $token", event.pull_request.user.login, event.repository.name, event.pull_request.number, 1)
-        .execute()
-        .body()
-        ?: emptyList()
+        .collectAllPrChanges(token, event, 1)
 
     return CollectedChanges(
         changedFiles.joinToString(" ") { file -> file.filename }
     )
+}
+
+private fun GithubService.collectAllPrChanges(
+    token: String,
+    event: GithubEvent,
+    startingPage: Int
+): List<GithubChangedFile> {
+    val changesFromCurrentPage = executeGetPullRequestFiles(token, event, startingPage)
+    val changesFromNextPage = if (changesFromCurrentPage.isEmpty())
+        emptyList() else
+        collectAllPrChanges(token, event, startingPage + 1)
+    return changesFromCurrentPage + changesFromNextPage
+}
+
+private fun GithubService.executeGetPullRequestFiles(
+    token: String,
+    event: GithubEvent,
+    startingPage: Int
+): List<GithubChangedFile> {
+    val requestFiles = getPullRequestFiles(
+        "token $token",
+        event.pull_request.user.login,
+        event.repository.name,
+        event.pull_request.number,
+        startingPage
+    )
+    return requestFiles
+        .execute()
+        .body()
+        ?: emptyList()
 }
 
 // event

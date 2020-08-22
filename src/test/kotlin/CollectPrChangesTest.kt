@@ -11,22 +11,28 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class CollectPrChangesTest {
-    @Test fun `the event triggers the collection of all kt-related changes`() {
+    @Test
+    fun `the event triggers the collection of all kt-related changes`() {
         mockWebServer.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 return when (request.path) {
                     "/repos/le0nidas/ktlint-playground/pulls/7/files?page=1" ->
                         MockResponse().setBody(
-                                "[\n" +
-                                        "  {\n" +
-                                        "    \"filename\": \"src/main/kotlin/Main.kt\",\n" +
-                                        "    \"status\": \"added\"\n" +
-                                        "  },\n" +
-                                        "  {\n" +
-                                        "    \"filename\": \"src/main/kotlin/Main2.kt\",\n" +
-                                        "    \"status\": \"added\"\n" +
-                                        "  }\n" +
-                                        "]"
+                            "[\n" +
+                                    "  {\n" +
+                                    "    \"filename\": \"src/main/kotlin/Main.kt\",\n" +
+                                    "    \"status\": \"added\"\n" +
+                                    "  },\n" +
+                                    "  {\n" +
+                                    "    \"filename\": \"src/main/kotlin/Main2.kt\",\n" +
+                                    "    \"status\": \"added\"\n" +
+                                    "  }\n" +
+                                    "]"
+                        )
+                    "/repos/le0nidas/ktlint-playground/pulls/7/files?page=2" ->
+                        MockResponse().setBody(
+                            "[\n" +
+                                    "]"
                         )
                     else ->
                         throw IllegalArgumentException("Unknown path: ${request.path}")
@@ -40,23 +46,29 @@ class CollectPrChangesTest {
         val actual = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
 
         assertThat(
-                actual,
-                equalTo(CollectedChanges("src/main/kotlin/Main.kt src/main/kotlin/Main2.kt"))
+            actual,
+            equalTo(CollectedChanges("src/main/kotlin/Main.kt src/main/kotlin/Main2.kt"))
         )
     }
 
-    @Test fun `the provided token is being sent in the request's header`() {
+    @Test
+    fun `the provided token is being sent in the request's header`() {
         mockWebServer.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 return when (request.path) {
                     "/repos/le0nidas/ktlint-playground/pulls/7/files?page=1" ->
                         MockResponse().setBody(
-                                "[\n" +
-                                        "  {\n" +
-                                        "    \"filename\": \"src/main/kotlin/Main.kt\",\n" +
-                                        "    \"status\": \"added\"\n" +
-                                        "  }\n" +
-                                        "]"
+                            "[\n" +
+                                    "  {\n" +
+                                    "    \"filename\": \"src/main/kotlin/Main.kt\",\n" +
+                                    "    \"status\": \"added\"\n" +
+                                    "  }\n" +
+                                    "]"
+                        )
+                    "/repos/le0nidas/ktlint-playground/pulls/7/files?page=2" ->
+                        MockResponse().setBody(
+                            "[\n" +
+                                    "]"
                         )
                     else ->
                         throw IllegalArgumentException("Unknown path: ${request.path}")
@@ -70,6 +82,59 @@ class CollectPrChangesTest {
         collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
 
         assertThat(mockWebServer.takeRequest().headers["Authorization"], equalTo("token abc1234"))
+    }
+
+    @Test
+    fun `collect changes from all pages`() {
+        mockWebServer.dispatcher = object : Dispatcher() {
+            override fun dispatch(request: RecordedRequest): MockResponse {
+                return when (request.path) {
+                    "/repos/le0nidas/ktlint-playground/pulls/7/files?page=1" ->
+                        MockResponse().setBody(
+                            "[\n" +
+                                    "  {\n" +
+                                    "    \"filename\": \"src/main/kotlin/Main.kt\",\n" +
+                                    "    \"status\": \"added\"\n" +
+                                    "  }\n" +
+                                    "]"
+                        )
+                    "/repos/le0nidas/ktlint-playground/pulls/7/files?page=2" ->
+                        MockResponse().setBody(
+                            "[\n" +
+                                    "  {\n" +
+                                    "    \"filename\": \"src/main/kotlin/Main2.kt\",\n" +
+                                    "    \"status\": \"added\"\n" +
+                                    "  }\n" +
+                                    "]"
+                        )
+                    "/repos/le0nidas/ktlint-playground/pulls/7/files?page=3" ->
+                        MockResponse().setBody(
+                            "[\n" +
+                                    "  {\n" +
+                                    "    \"filename\": \"src/main/kotlin/Main3.kt\",\n" +
+                                    "    \"status\": \"added\"\n" +
+                                    "  }\n" +
+                                    "]"
+                        )
+                    "/repos/le0nidas/ktlint-playground/pulls/7/files?page=4" ->
+                        MockResponse().setBody(
+                            "[\n" +
+                                    "]"
+                        )
+                    else ->
+                        throw IllegalArgumentException("Unknown path: ${request.path}")
+                }
+            }
+        }
+        val pathToEventFile = CollectPrChangesTest::class.java.classLoader.getResource("event.json").path
+        val userToken = "abc1234"
+
+        val actual = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
+
+        assertThat(
+            actual,
+            equalTo(CollectedChanges("src/main/kotlin/Main.kt src/main/kotlin/Main2.kt src/main/kotlin/Main3.kt"))
+        )
     }
 
     lateinit var mockWebServer: MockWebServer
