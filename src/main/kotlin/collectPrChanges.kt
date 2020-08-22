@@ -18,25 +18,43 @@ fun collectPrChanges(
     val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
         .build()
-
-    val json = File(args[0]).readText()
-    val event: GithubEvent = moshi
-        .adapter(GithubEvent::class.java)
-        .fromJson(json)
-        ?: throw Exception("")
-
-    val token = args[1]
-    val changedFiles: List<GithubChangedFile> = Retrofit.Builder()
+    val retrofit = Retrofit.Builder()
         .baseUrl(httpUrl)
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
-        .create(GithubService::class.java)
-        .collectAllPrChanges(token, event, 1)
 
-    val additionsAndModifications = changedFiles
-        .filterNot { file -> file.status == "removed" }
-        .joinToString(" ") { file -> file.filename}
-    return CollectedChanges(additionsAndModifications)
+    val event = createGithubEvent(args[ARGS_INDEX_EVENT_FILE_PATH], moshi) ?: throw Exception("")
+    val changes = collectChanges(args[ARGS_INDEX_TOKEN], retrofit, event)
+        .filterNot { file -> file.status == STATUS_REMOVED }
+
+    return CollectedChanges(changes.joinToString(" ") { file -> file.filename })
+}
+
+private const val ARGS_INDEX_EVENT_FILE_PATH = 0
+private const val ARGS_INDEX_TOKEN = 1
+private const val STATUS_REMOVED = "removed"
+
+private fun createGithubEvent(
+    eventFilePath: String,
+    moshi: Moshi
+): GithubEvent? {
+
+    val json = File(eventFilePath).readText()
+    return moshi
+        .adapter(GithubEvent::class.java)
+        .fromJson(json)
+}
+
+private fun collectChanges(
+    token: String,
+    retrofit: Retrofit,
+    event: GithubEvent
+): List<GithubChangedFile> {
+
+    val startingPage = 1
+    return retrofit
+        .create(GithubService::class.java)
+        .collectAllPrChanges(token, event, startingPage)
 }
 
 private fun GithubService.collectAllPrChanges(
@@ -44,6 +62,7 @@ private fun GithubService.collectAllPrChanges(
     event: GithubEvent,
     startingPage: Int
 ): List<GithubChangedFile> {
+
     val changesFromCurrentPage = executeGetPullRequestFiles(token, event, startingPage)
     val changesFromNextPage = if (changesFromCurrentPage.isEmpty())
         emptyList() else
@@ -56,6 +75,7 @@ private fun GithubService.executeGetPullRequestFiles(
     event: GithubEvent,
     startingPage: Int
 ): List<GithubChangedFile> {
+
     val requestFiles = getPullRequestFiles(
         "token $token",
         event.pull_request.user.login,
