@@ -33,9 +33,10 @@ fun collectPrChanges(
         .create(GithubService::class.java)
         .collectAllPrChanges(token, event, 1)
 
-    return CollectedChanges(
-        changedFiles.joinToString(" ") { file -> file.filename }
-    )
+    val additionsAndModifications = changedFiles
+        .filterNot { file -> file.status == "removed" }
+        .joinToString(" ") { file -> file.filename}
+    return CollectedChanges(additionsAndModifications)
 }
 
 private fun GithubService.collectAllPrChanges(
