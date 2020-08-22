@@ -13,7 +13,7 @@ import java.io.File
 fun collectPrChanges(
     args: Array<String>,
     httpUrl: HttpUrl = HttpUrl.get("https://api.github.com")
-): CollectionResult {
+): Pair<Int, String> {
 
     val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
@@ -28,9 +28,10 @@ fun collectPrChanges(
         .filterNot { file -> file.status == STATUS_REMOVED }
         .filter { file -> file.filename.endsWith(".kt") }
 
-    return CollectedChanges(changes.joinToString(" ") { file -> file.filename })
+    return Pair(EXIT_CODE_SUCCESS, changes.joinToString(" ") { file -> file.filename })
 }
 
+private const val EXIT_CODE_SUCCESS = 0
 private const val ARGS_INDEX_EVENT_FILE_PATH = 0
 private const val ARGS_INDEX_TOKEN = 1
 private const val STATUS_REMOVED = "removed"

@@ -54,7 +54,7 @@ class CollectPrChangesTest {
 
         assertThat(
             actual,
-            equalTo(CollectedChanges("src/main/kotlin/Main.kt src/main/kotlin/Main2.kt"))
+            equalTo(Pair(0, "src/main/kotlin/Main.kt src/main/kotlin/Main2.kt"))
         )
     }
 
@@ -138,7 +138,7 @@ class CollectPrChangesTest {
 
         assertThat(
             actual,
-            equalTo(CollectedChanges("src/main/kotlin/Main.kt src/main/kotlin/Main2.kt src/main/kotlin/Main3.kt"))
+            equalTo(Pair(0, "src/main/kotlin/Main.kt src/main/kotlin/Main2.kt src/main/kotlin/Main3.kt"))
         )
     }
 
@@ -184,7 +184,7 @@ class CollectPrChangesTest {
 
         assertThat(
             actual,
-            equalTo(CollectedChanges("src/main/kotlin/Main.kt src/main/kotlin/Main3.kt src/main/kotlin/Main4.kt"))
+            equalTo(Pair(0, "src/main/kotlin/Main.kt src/main/kotlin/Main3.kt src/main/kotlin/Main4.kt"))
         )
     }
 
