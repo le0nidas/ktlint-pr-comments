@@ -1,0 +1,6 @@
+{
+  "action": "synchronize",
+  "repository": {
+    "name": "ktlint-playground"
+  }
+}
