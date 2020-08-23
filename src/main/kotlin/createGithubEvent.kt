@@ -15,5 +15,6 @@ fun createGithubEvent(
 
 class GithubUser(val login: String)
 class GithubRepository(val name: String)
-class GithubPullRequest(val number: Int, val user: GithubUser)
+class GithubPullRequestHead(val sha: String)
+class GithubPullRequest(val number: Int, val user: GithubUser, val head: GithubPullRequestHead)
 data class GithubEvent(val pull_request: GithubPullRequest, val repository: GithubRepository)

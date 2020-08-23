@@ -7,6 +7,9 @@
     "url": "https://api.github.com/repos/le0nidas/ktlint-playground/pulls/7",
     "user": {
       "login": "le0nidas"
+    },
+    "head": {
+      "sha": "31017d4c19c5a69ac8d5327748cdde2514dba220"
     }
   },
   "repository": {
