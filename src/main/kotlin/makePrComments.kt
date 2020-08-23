@@ -23,9 +23,10 @@ fun makePrComments(
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
 
+    val relativePathsOfChangedFiles = loadRelativePathsOfChangedFiles(args[PrCommentsConstants.ARGS_INDEX_RELATIVE_PATHS_FILE_PATH])
     val report = createKtlintReport(args[PrCommentsConstants.ARGS_INDEX_KTLINT_REPORT_PATH], moshi)
     val event = createGithubEvent(args[PrCommentsConstants.ARGS_INDEX_EVENT_FILE_PATH], moshi)
-    val comments = convertKtlintReportToGithubPrComments(report, event)
+    val comments = convertKtlintReportToGithubPrComments(report, event, relativePathsOfChangedFiles)
     val token = args[PrCommentsConstants.ARGS_INDEX_TOKEN]
     makeComments(comments, token, event, retrofit)
 
@@ -33,9 +34,16 @@ fun makePrComments(
 }
 
 private object PrCommentsConstants {
-    const val ARGS_INDEX_KTLINT_REPORT_PATH = 0
-    const val ARGS_INDEX_EVENT_FILE_PATH = 1
-    const val ARGS_INDEX_TOKEN = 2
+    const val ARGS_INDEX_RELATIVE_PATHS_FILE_PATH = 0
+    const val ARGS_INDEX_KTLINT_REPORT_PATH = 1
+    const val ARGS_INDEX_EVENT_FILE_PATH = 2
+    const val ARGS_INDEX_TOKEN = 3
+}
+
+fun loadRelativePathsOfChangedFiles(pathToFileWithRelativePaths: String): List<String> {
+    return File(pathToFileWithRelativePaths)
+        .readText()
+        .split(" ")
 }
 
 // extract ktlint errors:
@@ -51,12 +59,17 @@ class KtlintFileErrors(val file: String, val errors: List<KtlintError>)
 class KtlintReport(val errors: List<KtlintFileErrors>)
 //------------------------
 
-fun convertKtlintReportToGithubPrComments(ktlintReport: KtlintReport, event: GithubEvent): List<GithubPrComment> {
+fun convertKtlintReportToGithubPrComments(
+    ktlintReport: KtlintReport,
+    event: GithubEvent,
+    relativePathsOfChangedFiles: List<String>
+): List<GithubPrComment> {
     return ktlintReport
         .errors
         .flatMap { fileErrors ->
             fileErrors.errors.map { ktlintError ->
-                GithubPrComment(ktlintError.message, event.pull_request.head.sha, fileErrors.file, ktlintError.line)
+                val fileName = relativePathsOfChangedFiles.first { relativePath -> fileErrors.file.endsWith(relativePath) }
+                GithubPrComment(ktlintError.message, event.pull_request.head.sha, fileName, ktlintError.line)
             }
         }
 }

@@ -25,11 +25,12 @@ class MakePrCommentsTest {
                 }
             }
         }
+        val pathToRelativePaths = MakePrCommentsTest::class.java.classLoader.getResource("relative-paths.txt").path
         val pathToKtlintReport = MakePrCommentsTest::class.java.classLoader.getResource("ktlint-report.json").path
         val pathToEventFile = MakePrCommentsTest::class.java.classLoader.getResource("event.json").path
         val token = "abc1234"
 
-        makePrComments(arrayOf(pathToKtlintReport, pathToEventFile, token), mockWebServer.url("/"))
+        makePrComments(arrayOf(pathToRelativePaths, pathToKtlintReport, pathToEventFile, token), mockWebServer.url("/"))
 
         assertAll(
             assertComment("{\"body\":\"Incorrect modifier order (should be \\\"public abstract\\\")\",\"commit_id\":\"31017d4c19c5a69ac8d5327748cdde2514dba220\",\"path\":\"src/main/kotlin/ConsinstentOrder.kt\",\"line\":5,\"side\":\"RIGHT\"}"),
@@ -50,12 +51,12 @@ class MakePrCommentsTest {
         )
         val report = KtlintReport(
             listOf(
-                KtlintFileErrors("fileA", listOf(KtlintError(7, "message A 7"), KtlintError(13, "message A 13"))),
-                KtlintFileErrors("fileB", listOf(KtlintError(17, "message B 17"))),
+                KtlintFileErrors("/work/github/fileA", listOf(KtlintError(7, "message A 7"), KtlintError(13, "message A 13"))),
+                KtlintFileErrors("/work/github/fileB", listOf(KtlintError(17, "message B 17"))),
             )
         )
 
-        val comments = convertKtlintReportToGithubPrComments(report, event)
+        val comments = convertKtlintReportToGithubPrComments(report, event, listOf("fileA", "fileB"))
 
         assertThat(
             comments,

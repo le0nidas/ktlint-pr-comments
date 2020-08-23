@@ -1,6 +1,6 @@
 [
   {
-    "file": "src/main/kotlin/ConsinstentOrder.kt",
+    "file": "/work/github/src/main/kotlin/ConsinstentOrder.kt",
     "errors": [
       {
         "line": 5,
@@ -23,7 +23,7 @@
     ]
   },
   {
-    "file": "src/main/kotlin/ConsistentSpacing.kt",
+    "file": "/work/github/src/main/kotlin/ConsistentSpacing.kt",
     "errors": [
       {
         "line": 15,
