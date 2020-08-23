@@ -1,0 +1,36 @@
+[
+  {
+    "file": "/work/github/src/main/kotlin/ConsinstentOrder.kt",
+    "errors": [
+      {
+        "line": 5,
+        "column": 1,
+        "message": "Incorrect modifier order (should be \"public abstract\")",
+        "rule": "modifier-order"
+      },
+      {
+        "line": 7,
+        "column": 5,
+        "message": "Incorrect modifier order (should be \"internal open suspend\")",
+        "rule": "modifier-order"
+      },
+      {
+        "line": 13,
+        "column": 5,
+        "message": "Incorrect modifier order (should be \"public override\")",
+        "rule": "modifier-order"
+      }
+    ]
+  },
+  {
+    "file": "/work/github/src/main/kotlin/ConsistentSpacing.kt",
+    "errors": [
+      {
+        "line": 15,
+        "column": 20,
+        "message": "Unnecessary block (\"{}\")",
+        "rule": "no-empty-class-body"
+      }
+    ]
+  }
+]
