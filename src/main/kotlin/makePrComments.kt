@@ -23,14 +23,19 @@ fun makePrComments(
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
 
-    val relativePathsOfChangedFiles = loadRelativePathsOfChangedFiles(args[PrCommentsConstants.ARGS_INDEX_RELATIVE_PATHS_FILE_PATH])
-    val report = createKtlintReport(args[PrCommentsConstants.ARGS_INDEX_KTLINT_REPORT_PATH], moshi)
-    val event = createGithubEvent(args[PrCommentsConstants.ARGS_INDEX_EVENT_FILE_PATH], moshi)
-    val comments = convertKtlintReportToGithubPrComments(report, event, relativePathsOfChangedFiles)
-    val token = args[PrCommentsConstants.ARGS_INDEX_TOKEN]
-    makeComments(comments, token, event, retrofit)
+    return try {
+        val relativePathsOfChangedFiles =
+            loadRelativePathsOfChangedFiles(args[PrCommentsConstants.ARGS_INDEX_RELATIVE_PATHS_FILE_PATH])
+        val report = createKtlintReport(args[PrCommentsConstants.ARGS_INDEX_KTLINT_REPORT_PATH], moshi)
+        val event = createGithubEvent(args[PrCommentsConstants.ARGS_INDEX_EVENT_FILE_PATH], moshi)
+        val comments = convertKtlintReportToGithubPrComments(report, event, relativePathsOfChangedFiles)
+        val token = args[PrCommentsConstants.ARGS_INDEX_TOKEN]
+        makeComments(comments, token, event, retrofit)
 
-    return 0
+        0
+    } catch (ex: Throwable) {
+        -1
+    }
 }
 
 private object PrCommentsConstants {
@@ -59,21 +64,7 @@ class KtlintFileErrors(val file: String, val errors: List<KtlintError>)
 class KtlintReport(val errors: List<KtlintFileErrors>)
 //------------------------
 
-fun convertKtlintReportToGithubPrComments(
-    ktlintReport: KtlintReport,
-    event: GithubEvent,
-    relativePathsOfChangedFiles: List<String>
-): List<GithubPrComment> {
-    return ktlintReport
-        .errors
-        .flatMap { fileErrors ->
-            fileErrors.errors.map { ktlintError ->
-                val fileName = relativePathsOfChangedFiles.first { relativePath -> fileErrors.file.endsWith(relativePath) }
-                GithubPrComment(ktlintError.message, event.pull_request.head.sha, fileName, ktlintError.line)
-            }
-        }
-}
-
+// make comment for the PR to github:
 fun makeComments(comments: List<GithubPrComment>, token: String, event: GithubEvent, retrofit: Retrofit) {
     val githubPrCommentsService = retrofit.create(GithubPrCommentsService::class.java)
     comments.forEach { comment ->
@@ -109,3 +100,22 @@ data class GithubPrComment(
 )
 
 class GithubPrCommentResponse(val url: String)
+//------------------------------------
+
+// helping functions:
+fun convertKtlintReportToGithubPrComments(
+    ktlintReport: KtlintReport,
+    event: GithubEvent,
+    relativePathsOfChangedFiles: List<String>
+): List<GithubPrComment> {
+    return ktlintReport
+        .errors
+        .flatMap { fileErrors ->
+            fileErrors.errors.map { ktlintError ->
+                val fileName =
+                    relativePathsOfChangedFiles.first { relativePath -> fileErrors.file.endsWith(relativePath) }
+                GithubPrComment(ktlintError.message, event.pull_request.head.sha, fileName, ktlintError.line)
+            }
+        }
+}
+//--------------------
