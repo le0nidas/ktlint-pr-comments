@@ -12,7 +12,7 @@ import java.io.File
 
 fun collectPrChanges(
     args: Array<String>,
-    httpUrl: HttpUrl = HttpUrl.get("https://api.github.com"),
+    httpUrl: HttpUrl = HttpUrl.get(Common.URL_GITHUB)
 ): Int {
 
     val moshi = Moshi.Builder()
@@ -25,13 +25,13 @@ fun collectPrChanges(
 
     var failedOnEvent = true
     return try {
-        val event = createGithubEvent(args[Constants.ARGS_INDEX_EVENT_FILE_PATH], moshi)
+        val event = createGithubEvent(args[Common.ARGS_INDEX_EVENT_FILE_PATH], moshi)
             .also { failedOnEvent = false }
-        val changes = collectChanges(args[Constants.ARGS_INDEX_TOKEN], retrofit, event)
+        val changes = collectChanges(args[Common.ARGS_INDEX_TOKEN], retrofit, event)
             .filterNot { file -> file.status == Constants.STATUS_REMOVED }
             .filter { file -> file.filename.endsWith(".kt") }
         saveChanges(changes)
-        Constants.EXIT_CODE_SUCCESS
+        Common.EXIT_CODE_SUCCESS
     } catch (ex: Throwable) {
         val prefix = if (failedOnEvent)
             "Error while getting the event" else
@@ -39,7 +39,7 @@ fun collectPrChanges(
         val errorMessage = if (ex.message.isNullOrBlank())
             "Unknown error: ${ex.javaClass.name}" else
             ex.message
-        Constants.EXIT_CODE_FAILURE
+        Common.EXIT_CODE_FAILURE
     }
 }
 
@@ -49,10 +49,6 @@ fun saveChanges(changes: List<GithubChangedFile>) {
 }
 
 private object Constants {
-    const val EXIT_CODE_SUCCESS = 0
-    const val EXIT_CODE_FAILURE = -1
-    const val ARGS_INDEX_EVENT_FILE_PATH = 0
-    const val ARGS_INDEX_TOKEN = 1
     const val STATUS_REMOVED = "removed"
 }
 
