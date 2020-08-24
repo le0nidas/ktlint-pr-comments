@@ -17,6 +17,8 @@ fun makePrComments(
     ktlintReportPath: String = Common.KTLINT_REPORT
 ): Int {
 
+    debug("fun makePrComments: ${args[Common.ARGS_INDEX_EVENT_FILE_PATH]}\n$collectionReportPath\n$ktlintReportPath")
+
     val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
         .build()
@@ -36,18 +38,32 @@ fun makePrComments(
 
         Common.EXIT_CODE_SUCCESS
     } catch (ex: Throwable) {
+        val errorMessage = if (ex.message.isNullOrBlank())
+            "Unknown error: ${ex.javaClass.name}" else
+            ex.message
+        error("while collecting PR changes: $errorMessage")
         Common.EXIT_CODE_FAILURE
     }
 }
 
-fun loadRelativePathsOfChangedFiles(pathToFileWithRelativePaths: String): List<String> {
+fun loadRelativePathsOfChangedFiles(
+    pathToFileWithRelativePaths: String
+): List<String> {
+
+    debug("fun loadRelativePathsOfChangedFiles: $pathToFileWithRelativePaths")
+
     return File(pathToFileWithRelativePaths)
         .readText()
         .split(" ")
 }
 
 // extract ktlint errors:
-fun createKtlintReport(pathToKtlintReport: String, moshi: Moshi): KtlintReport {
+fun createKtlintReport(
+    pathToKtlintReport: String, moshi: Moshi
+): KtlintReport {
+
+    debug("fun createKtlintReport: $pathToKtlintReport")
+
     val json = "{\"errors\": ${File(pathToKtlintReport).readText()}}"
     return moshi.adapter(KtlintReport::class.java)
         .fromJson(json)
@@ -60,7 +76,15 @@ class KtlintReport(val errors: List<KtlintFileErrors>)
 //------------------------
 
 // make comment for the PR to github:
-fun makeComments(comments: List<GithubPrComment>, token: String, event: GithubEvent, retrofit: Retrofit) {
+fun makeComments(
+    comments: List<GithubPrComment>,
+    token: String,
+    event: GithubEvent,
+    retrofit: Retrofit
+) {
+
+    debug("fun makeComments: $comments\n$event")
+
     val githubPrCommentsService = retrofit.create(GithubPrCommentsService::class.java)
     comments.forEach { comment ->
         githubPrCommentsService
@@ -103,6 +127,9 @@ fun convertKtlintReportToGithubPrComments(
     event: GithubEvent,
     relativePathsOfChangedFiles: List<String>
 ): List<GithubPrComment> {
+
+    debug("fun convertKtlintReportToGithubPrComments: $event\n$relativePathsOfChangedFiles")
+
     return ktlintReport
         .errors
         .flatMap { fileErrors ->

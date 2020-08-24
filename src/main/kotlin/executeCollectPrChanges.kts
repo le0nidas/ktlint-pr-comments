@@ -5,6 +5,7 @@ import kotlin.system.exitProcess
 //DEPS com.squareup.retrofit2:retrofit:2.9.0
 //DEPS com.squareup.retrofit2:converter-moshi:2.9.0
 
+//INCLUDE logging.kt
 //INCLUDE common.kt
 //INCLUDE collectPrChanges.kt
 //INCLUDE createGithubEvent.kt

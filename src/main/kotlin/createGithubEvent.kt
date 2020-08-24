@@ -6,6 +6,8 @@ fun createGithubEvent(
     moshi: Moshi
 ): GithubEvent {
 
+    debug("fun createGithubEvent: $eventFilePath")
+
     val json = File(eventFilePath).readText()
     return moshi
         .adapter(GithubEvent::class.java)
