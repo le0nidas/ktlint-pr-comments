@@ -8,11 +8,12 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Path
 import retrofit2.http.Query
+import java.io.File
 
 fun collectPrChanges(
     args: Array<String>,
-    httpUrl: HttpUrl = HttpUrl.get("https://api.github.com")
-): Pair<Int, String> {
+    httpUrl: HttpUrl = HttpUrl.get("https://api.github.com"),
+): Int {
 
     val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
@@ -29,7 +30,8 @@ fun collectPrChanges(
         val changes = collectChanges(args[Constants.ARGS_INDEX_TOKEN], retrofit, event)
             .filterNot { file -> file.status == Constants.STATUS_REMOVED }
             .filter { file -> file.filename.endsWith(".kt") }
-        Pair(Constants.EXIT_CODE_SUCCESS, changes.joinToString(" ") { file -> file.filename })
+        saveChanges(changes)
+        Constants.EXIT_CODE_SUCCESS
     } catch (ex: Throwable) {
         val prefix = if (failedOnEvent)
             "Error while getting the event" else
@@ -37,8 +39,13 @@ fun collectPrChanges(
         val errorMessage = if (ex.message.isNullOrBlank())
             "Unknown error: ${ex.javaClass.name}" else
             ex.message
-        Pair(Constants.EXIT_CODE_FAILURE, "$prefix: $errorMessage")
+        Constants.EXIT_CODE_FAILURE
     }
+}
+
+fun saveChanges(changes: List<GithubChangedFile>) {
+    val changesConcatenated = changes.joinToString(" ") { file -> file.filename }
+    File(Common.COLLECTION_REPORT).writeText(changesConcatenated)
 }
 
 private object Constants {

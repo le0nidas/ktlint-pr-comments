@@ -9,6 +9,8 @@ import okhttp3.mockwebserver.RecordedRequest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertAll
+import java.io.File
 
 class CollectPrChangesTest {
     @Test fun `the event triggers the collection of all kt-related changes`() {
@@ -50,11 +52,11 @@ class CollectPrChangesTest {
         val pathToEventFile = CollectPrChangesTest::class.java.classLoader.getResource("event.json").path
         val userToken = "abc1234"
 
-        val actual = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
+        val result = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
 
-        assertThat(
-            actual,
-            equalTo(Pair(0, "src/main/kotlin/Main.kt src/main/kotlin/Main2.kt"))
+        assertAll(
+            { assertThat(result, equalTo(0))},
+            { assertThat(File("collection-report.txt").readText(), equalTo("src/main/kotlin/Main.kt src/main/kotlin/Main2.kt"))}
         )
     }
 
@@ -134,11 +136,11 @@ class CollectPrChangesTest {
         val pathToEventFile = CollectPrChangesTest::class.java.classLoader.getResource("event.json").path
         val userToken = "abc1234"
 
-        val actual = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
+        val result = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
 
-        assertThat(
-            actual,
-            equalTo(Pair(0, "src/main/kotlin/Main.kt src/main/kotlin/Main2.kt src/main/kotlin/Main3.kt"))
+        assertAll(
+            { assertThat(result, equalTo(0))},
+            { assertThat(File("collection-report.txt").readText(), equalTo("src/main/kotlin/Main.kt src/main/kotlin/Main2.kt src/main/kotlin/Main3.kt"))}
         )
     }
 
@@ -180,11 +182,11 @@ class CollectPrChangesTest {
         val pathToEventFile = CollectPrChangesTest::class.java.classLoader.getResource("event.json").path
         val userToken = "abc1234"
 
-        val actual = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
+        val result = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
 
-        assertThat(
-            actual,
-            equalTo(Pair(0, "src/main/kotlin/Main.kt src/main/kotlin/Main3.kt src/main/kotlin/Main4.kt"))
+        assertAll(
+            { assertThat(result, equalTo(0))},
+            { assertThat(File("collection-report.txt").readText(), equalTo("src/main/kotlin/Main.kt src/main/kotlin/Main3.kt src/main/kotlin/Main4.kt"))}
         )
     }
 
@@ -205,11 +207,11 @@ class CollectPrChangesTest {
         val pathToEventFile = CollectPrChangesTest::class.java.classLoader.getResource("event.json").path
         val userToken = "abc1234"
 
-        val actual = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
+        val result = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
 
-        assertThat(
-            actual,
-            equalTo(Pair(0, ""))
+        assertAll(
+            { assertThat(result, equalTo(0))},
+            { assertThat(File("collection-report.txt").readText(), equalTo(""))}
         )
     }
 
@@ -243,11 +245,11 @@ class CollectPrChangesTest {
         val pathToEventFile = CollectPrChangesTest::class.java.classLoader.getResource("event.json").path
         val userToken = "abc1234"
 
-        val actual = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
+        val result = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
 
-        assertThat(
-            actual,
-            equalTo(Pair(0, ""))
+        assertAll(
+            { assertThat(result, equalTo(0))},
+            { assertThat(File("collection-report.txt").readText(), equalTo(""))}
         )
     }
 
@@ -255,12 +257,9 @@ class CollectPrChangesTest {
         val pathToEventFile = CollectPrChangesTest::class.java.classLoader.getResource("not-correct-event.json").path
         val userToken = "abc1234"
 
-        val actual = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
+        val result = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
 
-        assertThat(
-            actual,
-            equalTo(Pair(-1, "Error while getting the event: Required value 'pull_request' missing at \$"))
-        )
+        assertThat(result, equalTo(-1))
     }
 
     @Test fun `when there is an error while getting the changes from github it returns the error's message`() {
@@ -282,12 +281,9 @@ class CollectPrChangesTest {
         val pathToEventFile = CollectPrChangesTest::class.java.classLoader.getResource("event.json").path
         val userToken = "abc1234"
 
-        val actual = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
+        val result = collectPrChanges(arrayOf(pathToEventFile, userToken), mockWebServer.url("/"))
 
-        assertThat(
-            actual,
-            equalTo(Pair(-1, "Error while getting the changes: Expected BEGIN_ARRAY but was BEGIN_OBJECT at path \$"))
-        )
+        assertThat(result, equalTo(-1))
     }
 
     lateinit var mockWebServer: MockWebServer
@@ -301,5 +297,8 @@ class CollectPrChangesTest {
     @AfterEach
     fun tearDown() {
         mockWebServer.shutdown()
+        with(File("collection-report.txt")) {
+            if (exists()) delete()
+        }
     }
 }
