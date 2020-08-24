@@ -30,7 +30,7 @@ class MakePrCommentsTest {
         val pathToEventFile = MakePrCommentsTest::class.java.classLoader.getResource("event.json").path
         val token = "abc1234"
 
-        makePrComments(arrayOf(pathToRelativePaths, pathToKtlintReport, pathToEventFile, token), mockWebServer.url("/"))
+        makePrComments(arrayOf(pathToEventFile, token), mockWebServer.url("/"), pathToRelativePaths, pathToKtlintReport)
 
         assertAll(
             assertComment("{\"body\":\"Incorrect modifier order (should be \\\"public abstract\\\")\",\"commit_id\":\"31017d4c19c5a69ac8d5327748cdde2514dba220\",\"path\":\"src/main/kotlin/ConsinstentOrder.kt\",\"line\":5,\"side\":\"RIGHT\"}"),

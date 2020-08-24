@@ -12,7 +12,9 @@ import java.io.File
 
 fun makePrComments(
     args: Array<String>,
-    httpUrl: HttpUrl = HttpUrl.get("https://api.github.com")
+    httpUrl: HttpUrl = HttpUrl.get("https://api.github.com"),
+    collectionReportPath: String = Common.COLLECTION_REPORT,
+    ktlintReportPath: String = Common.KTLINT_REPORT
 ): Int {
 
     val moshi = Moshi.Builder()
@@ -25,8 +27,8 @@ fun makePrComments(
 
     return try {
         val relativePathsOfChangedFiles =
-            loadRelativePathsOfChangedFiles(args[PrCommentsConstants.ARGS_INDEX_RELATIVE_PATHS_FILE_PATH])
-        val report = createKtlintReport(args[PrCommentsConstants.ARGS_INDEX_KTLINT_REPORT_PATH], moshi)
+            loadRelativePathsOfChangedFiles(collectionReportPath)
+        val report = createKtlintReport(ktlintReportPath, moshi)
         val event = createGithubEvent(args[PrCommentsConstants.ARGS_INDEX_EVENT_FILE_PATH], moshi)
         val comments = convertKtlintReportToGithubPrComments(report, event, relativePathsOfChangedFiles)
         val token = args[PrCommentsConstants.ARGS_INDEX_TOKEN]
@@ -39,10 +41,8 @@ fun makePrComments(
 }
 
 private object PrCommentsConstants {
-    const val ARGS_INDEX_RELATIVE_PATHS_FILE_PATH = 0
-    const val ARGS_INDEX_KTLINT_REPORT_PATH = 1
-    const val ARGS_INDEX_EVENT_FILE_PATH = 2
-    const val ARGS_INDEX_TOKEN = 3
+    const val ARGS_INDEX_EVENT_FILE_PATH = 0
+    const val ARGS_INDEX_TOKEN = 1
 }
 
 fun loadRelativePathsOfChangedFiles(pathToFileWithRelativePaths: String): List<String> {
