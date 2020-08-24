@@ -5,14 +5,14 @@ import kotlin.system.exitProcess
 //DEPS com.squareup.retrofit2:retrofit:2.9.0
 //DEPS com.squareup.retrofit2:converter-moshi:2.9.0
 
+//INCLUDE common.kt
 //INCLUDE collectPrChanges.kt
 //INCLUDE createGithubEvent.kt
 
 val result = collectPrChanges(args)
 
-if (result.first != 0) {
-    System.err.print(result.second)
-    exitProcess(result.first)
+if (result != 0) {
+    exitProcess(result)
 }
 
-print(result.second)
+print("Changes collected")
