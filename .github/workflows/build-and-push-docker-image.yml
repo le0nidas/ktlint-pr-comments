@@ -7,13 +7,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
       - name: install sdkman
         run: curl -s "https://get.sdkman.io" | bash
-
 
       - name: install kotlin
         run: source "$HOME/.sdkman/bin/sdkman-init.sh" && sdk install kotlin
@@ -24,7 +23,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: package scripts
-        run: /bin/bash package-scripts.sh
+        run: source "$HOME/.sdkman/bin/sdkman-init.sh" && /bin/bash package-scripts.sh
 
       - name: push to github packages
         uses: docker/build-push-action@v1
