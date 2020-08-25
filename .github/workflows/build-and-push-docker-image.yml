@@ -1,4 +1,4 @@
-name: "build"
+name: "build and push docker image"
 
 on:
   push:
@@ -12,15 +12,14 @@ jobs:
 
     steps:
       - name: install sdkman
-        run: |
-          curl -s "https://get.sdkman.io" | bash
-          source "$HOME/.sdkman/bin/sdkman-init.sh"
+        run: curl -s "https://get.sdkman.io" | bash
+
 
       - name: install kotlin
-        run: sdk install kotlin
+        run: source "$HOME/.sdkman/bin/sdkman-init.sh" && sdk install kotlin
 
       - name: install kscript
-        run: sdk install kscript
+        run: source "$HOME/.sdkman/bin/sdkman-init.sh" && sdk install kscript
 
       - uses: actions/checkout@v2
 
