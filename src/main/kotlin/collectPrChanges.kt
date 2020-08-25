@@ -15,7 +15,7 @@ fun collectPrChanges(
     httpUrl: HttpUrl = HttpUrl.get(Common.URL_GITHUB)
 ): Int {
 
-    debug("fun collectPrChanges: ${args[Common.ARGS_INDEX_EVENT_FILE_PATH]}")
+    debug("fun collectPrChanges: args=${args[Common.ARGS_INDEX_EVENT_FILE_PATH]}")
 
     val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
@@ -45,7 +45,7 @@ fun saveChanges(
     changes: List<GithubChangedFile>
 ) {
 
-    debug("fun saveChanges: $changes")
+    debug("fun saveChanges: changes=$changes")
 
     val changesConcatenated = changes.joinToString(" ") { file -> file.filename }
     File(Common.COLLECTION_REPORT).writeText(changesConcatenated)
@@ -62,7 +62,7 @@ fun collectChanges(
     event: GithubEvent
 ): List<GithubChangedFile> {
 
-    debug("fun collectChanges: $event")
+    debug("fun collectChanges: event=$event")
 
     val startingPage = 1
     return retrofit
@@ -76,7 +76,7 @@ fun GithubService.collectAllPrChanges(
     startingPage: Int
 ): List<GithubChangedFile> {
 
-    debug("fun GithubService.collectAllPrChanges: $event\n$startingPage")
+    debug("fun GithubService.collectAllPrChanges: event=$event|startingPage=$startingPage")
 
     val changesFromCurrentPage = executeGetPullRequestFiles(token, event, startingPage)
     val changesFromNextPage = if (changesFromCurrentPage.isEmpty())
@@ -91,7 +91,7 @@ fun GithubService.executeGetPullRequestFiles(
     startingPage: Int
 ): List<GithubChangedFile> {
 
-    debug("fun GithubService.executeGetPullRequestFiles: $event\n$startingPage")
+    debug("fun GithubService.executeGetPullRequestFiles: event=$event|startingPage=$startingPage")
 
     val requestFiles = getPullRequestFiles(
         "token $token",
@@ -117,5 +117,5 @@ interface GithubService {
     ): Call<List<GithubChangedFile>>
 }
 
-class GithubChangedFile(val filename: String, val status: String)
+data class GithubChangedFile(val filename: String, val status: String)
 //------------------------------

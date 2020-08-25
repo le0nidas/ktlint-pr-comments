@@ -16,4 +16,4 @@ if (result != 0) {
     exitProcess(result)
 }
 
-print("Changes collected")
+println("Changes collected")

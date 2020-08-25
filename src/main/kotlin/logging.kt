@@ -1,7 +1,7 @@
 fun debug(message: String) {
-    print("::debug::$message")
+    println("::debug::$message")
 }
 
 fun error(message: String) {
-    print("::error::$message")
+    println("::error::$message")
 }

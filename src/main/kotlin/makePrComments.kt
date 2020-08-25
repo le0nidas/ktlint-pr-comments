@@ -17,7 +17,7 @@ fun makePrComments(
     ktlintReportPath: String = Common.KTLINT_REPORT
 ): Int {
 
-    debug("fun makePrComments: ${args[Common.ARGS_INDEX_EVENT_FILE_PATH]}\n$collectionReportPath\n$ktlintReportPath")
+    debug("fun makePrComments: args=${args[Common.ARGS_INDEX_EVENT_FILE_PATH]}|collectionReportPath=$collectionReportPath|ktlintReportPath=$ktlintReportPath")
 
     val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
@@ -41,7 +41,7 @@ fun makePrComments(
         val errorMessage = if (ex.message.isNullOrBlank())
             "Unknown error: ${ex.javaClass.name}" else
             ex.message
-        error("while collecting PR changes: $errorMessage")
+        error("while making PR comments: $errorMessage")
         Common.EXIT_CODE_FAILURE
     }
 }
@@ -50,7 +50,7 @@ fun loadRelativePathsOfChangedFiles(
     pathToFileWithRelativePaths: String
 ): List<String> {
 
-    debug("fun loadRelativePathsOfChangedFiles: $pathToFileWithRelativePaths")
+    debug("fun loadRelativePathsOfChangedFiles: pathToFileWithRelativePaths=$pathToFileWithRelativePaths")
 
     return File(pathToFileWithRelativePaths)
         .readText()
@@ -62,7 +62,7 @@ fun createKtlintReport(
     pathToKtlintReport: String, moshi: Moshi
 ): KtlintReport {
 
-    debug("fun createKtlintReport: $pathToKtlintReport")
+    debug("fun createKtlintReport: pathToKtlintReport=$pathToKtlintReport")
 
     val json = "{\"errors\": ${File(pathToKtlintReport).readText()}}"
     return moshi.adapter(KtlintReport::class.java)
@@ -83,7 +83,7 @@ fun makeComments(
     retrofit: Retrofit
 ) {
 
-    debug("fun makeComments: $comments\n$event")
+    debug("fun makeComments: comments=$comments|event=$event")
 
     val githubPrCommentsService = retrofit.create(GithubPrCommentsService::class.java)
     comments.forEach { comment ->
@@ -128,7 +128,7 @@ fun convertKtlintReportToGithubPrComments(
     relativePathsOfChangedFiles: List<String>
 ): List<GithubPrComment> {
 
-    debug("fun convertKtlintReportToGithubPrComments: $event\n$relativePathsOfChangedFiles")
+    debug("fun convertKtlintReportToGithubPrComments: event=$event|relativePathsOfChangedFiles=$relativePathsOfChangedFiles")
 
     return ktlintReport
         .errors

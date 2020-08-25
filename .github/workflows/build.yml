@@ -1,0 +1,37 @@
+name: "build"
+
+on:
+  push:
+    branches: [master]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: install sdkman
+        run: |
+          curl -s "https://get.sdkman.io" | bash
+          source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+      - name: install kotlin
+        run: sdk install kotlin
+
+      - name: install kscript
+        run: sdk install kscript
+
+      - uses: actions/checkout@v2
+
+      - name: package scripts
+        run: /bin/bash package-scripts.sh
+
+      - name: push to github packages
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: le0nidas/ktlint-pr-comments/ktlint-pr-comments
+          tag_with_ref: true
