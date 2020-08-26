@@ -1,0 +1,13 @@
+name: ktlint-pr-comments
+description: Run Ktlint in all added/modified .kt files and make comments for any errors
+author: Leonidas Partsas
+branding:
+  icon: file-text
+  color: blue
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+inputs:
+  repotoken:
+    description: A token that grands access to read/write actions. Usually secrets.GITHUB_TOKEN.
+    required: true
