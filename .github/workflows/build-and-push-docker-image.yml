@@ -26,12 +26,11 @@ jobs:
       - name: Package execution scripts
         run: source "$HOME/.sdkman/bin/sdkman-init.sh" && /bin/bash image/package-scripts.sh
 
-      - name: Build and push Docker image to Github packages
+      - name: Build and push Docker image to Docker hub
         uses: docker/build-push-action@v1
         with:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
           dockerfile: image/Dockerfile
-          registry: docker.pkg.github.com
           repository: le0nidas/ktlint-pr-comments/ktlint-pr-comments
           tag_with_ref: true
