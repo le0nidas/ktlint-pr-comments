@@ -11,7 +11,7 @@ RUN chmod +x /executeCollectPrChanges
 COPY executeMakePrComments /executeMakePrComments
 RUN chmod +x /executeMakePrComments
 
-COPY run-scripts.sh /run-scripts.sh
+COPY image/run-scripts.sh /run-scripts.sh
 RUN chmod +x /run-scripts.sh
 
 ENTRYPOINT /bin/bash /run-scripts.sh

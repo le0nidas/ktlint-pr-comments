@@ -1,4 +1,4 @@
-name: "build and push docker image"
+name: "Build and push Docker image"
 
 on:
   push:
@@ -7,29 +7,31 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-push:
+  execution:
     runs-on: ubuntu-latest
 
     steps:
-      - name: install sdkman
+      - name: Install sdkman
         run: curl -s "https://get.sdkman.io" | bash
 
-      - name: install kotlin
+      - name: Install Kotlin
         run: source "$HOME/.sdkman/bin/sdkman-init.sh" && sdk install kotlin
 
-      - name: install kscript
+      - name: Install kscript
         run: source "$HOME/.sdkman/bin/sdkman-init.sh" && sdk install kscript
 
-      - uses: actions/checkout@v2
+      - name: Pull source from repository
+        uses: actions/checkout@v2
 
-      - name: package scripts
+      - name: Package execution scripts
         run: source "$HOME/.sdkman/bin/sdkman-init.sh" && /bin/bash package-scripts.sh
 
-      - name: push to github packages
+      - name: Build and push Docker image to Github packages
         uses: docker/build-push-action@v1
         with:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+          dockerfile: image/Dockerfile
           registry: docker.pkg.github.com
           repository: le0nidas/ktlint-pr-comments/ktlint-pr-comments
           tag_with_ref: true
