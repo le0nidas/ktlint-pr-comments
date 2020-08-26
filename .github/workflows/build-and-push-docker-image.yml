@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Package execution scripts
-        run: source "$HOME/.sdkman/bin/sdkman-init.sh" && /bin/bash package-scripts.sh
+        run: source "$HOME/.sdkman/bin/sdkman-init.sh" && /bin/bash image/package-scripts.sh
 
       - name: Build and push Docker image to Github packages
         uses: docker/build-push-action@v1
