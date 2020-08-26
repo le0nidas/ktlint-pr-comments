@@ -15,6 +15,7 @@ fun createGithubEvent(
         ?: throw Exception("Could not create json from file: $eventFilePath")
 }
 
+
 data class GithubUser(val login: String)
 data class GithubRepository(val name: String)
 data class GithubPullRequestHead(val sha: String)
