@@ -32,5 +32,5 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           dockerfile: image/Dockerfile
-          repository: le0nidas/ktlint-pr-comments/ktlint-pr-comments
+          repository: le0nidas/ktlint-pr-comments
           tag_with_ref: true
