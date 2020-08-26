@@ -9,6 +9,7 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
 import java.io.File
+import java.lang.Thread.sleep
 
 fun makePrComments(
     args: Array<String>,
@@ -123,6 +124,7 @@ fun makeComments(
                 comment
             )
             .execute()
+        sleep(250) // wait 1/4 of a second to avoid abusing the rate limit
     }
 }
 
