@@ -6,8 +6,21 @@ and makes a line comment for every error that ktlint found.
 Note that in order to make a comment the error must be in a line that is part of the PR's diff.
 
 ## Usage
+
 ```yaml
 - uses: le0nidas/ktlint-pr-comments@v1
   with:
     repotoken: ${{ secrets.GITHUB_TOKEN }}
 ```
+
+## Example
+
+The code:
+```kotlin
+class Person(val name: String, val age: Int) {
+}
+``` 
+
+will produce the comment:
+
+![screenshot](ktlint-pr-comments_comment.png)
