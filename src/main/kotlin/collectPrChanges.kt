@@ -47,7 +47,15 @@ fun saveChanges(
 
     debug("fun saveChanges: changes=$changes")
 
-    val changesConcatenated = changes.joinToString(" ") { file -> file.filename }
+    val changesConcatenated = changes.joinToString("\n") { file ->
+        val patches = file.patch
+            .split("@@")
+            .filter { s -> s.trim().startsWith("-") }
+            .flatMap { s -> s.trim().split(" ") }
+            .filter { s -> s.startsWith("+") }
+            .joinToString(" ") { s -> s.removePrefix("+") }
+        "${file.filename} $patches"
+    }
     File(Common.COLLECTION_REPORT).writeText(changesConcatenated)
 }
 
@@ -117,5 +125,4 @@ interface GithubService {
     ): Call<List<GithubChangedFile>>
 }
 
-data class GithubChangedFile(val filename: String, val status: String)
-//------------------------------
+data class GithubChangedFile(val filename: String, val status: String, val patch: String)

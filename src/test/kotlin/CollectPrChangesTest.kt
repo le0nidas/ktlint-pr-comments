@@ -22,19 +22,23 @@ class CollectPrChangesTest {
                             "[\n" +
                                     "  {\n" +
                                     "    \"filename\": \"src/main/kotlin/Main.kt\",\n" +
-                                    "    \"status\": \"added\"\n" +
+                                    "    \"status\": \"added\",\n" +
+                                    "    \"patch\": \"@@ -0,0 +1,8 @@\nblah blah\"" +
                                     "  },\n" +
                                     "  {\n" +
                                     "    \"filename\": \"src/main/kotlin/Dockerfile\",\n" +
-                                    "    \"status\": \"added\"\n" +
+                                    "    \"status\": \"added\",\n" +
+                                    "    \"patch\": \"@@ -0,0 +2,5 @@\nblah blah\"" +
                                     "  },\n" +
                                     "  {\n" +
                                     "    \"filename\": \"src/main/kotlin/action.yml\",\n" +
-                                    "    \"status\": \"added\"\n" +
+                                    "    \"status\": \"added\",\n" +
+                                    "    \"patch\": \"@@ -0,0 +22,8 @@\nblah blah\"" +
                                     "  },\n" +
                                     "  {\n" +
                                     "    \"filename\": \"src/main/kotlin/Main2.kt\",\n" +
-                                    "    \"status\": \"added\"\n" +
+                                    "    \"status\": \"added\",\n" +
+                                    "    \"patch\": \"@@ -15,8 +15,6 @@ blah blah\n  @@ -98,6 +96,7 @@ blah blah\n@@ -206,8 +205,6 @@ blah blah\n  @JvmStatic\"" +
                                     "  }\n" +
                                     "]"
                         )
@@ -56,7 +60,12 @@ class CollectPrChangesTest {
 
         assertAll(
             { assertThat(result, equalTo(0))},
-            { assertThat(File("collection-report.txt").readText(), equalTo("src/main/kotlin/Main.kt src/main/kotlin/Main2.kt"))}
+            {
+                assertThat(
+                    File("collection-report.txt").readText(),
+                    equalTo("src/main/kotlin/Main.kt 1,8\nsrc/main/kotlin/Main2.kt 15,6 96,7 205,6")
+                )
+            }
         )
     }
 
@@ -101,7 +110,8 @@ class CollectPrChangesTest {
                             "[\n" +
                                     "  {\n" +
                                     "    \"filename\": \"src/main/kotlin/Main.kt\",\n" +
-                                    "    \"status\": \"added\"\n" +
+                                    "    \"status\": \"added\",\n" +
+                                    "    \"patch\": \"@@ -0,0 +1,8 @@\nblah blah\"" +
                                     "  }\n" +
                                     "]"
                         )
@@ -110,7 +120,8 @@ class CollectPrChangesTest {
                             "[\n" +
                                     "  {\n" +
                                     "    \"filename\": \"src/main/kotlin/Main2.kt\",\n" +
-                                    "    \"status\": \"added\"\n" +
+                                    "    \"status\": \"added\",\n" +
+                                    "    \"patch\": \"@@ -0,0 +1,8 @@\nblah blah\"" +
                                     "  }\n" +
                                     "]"
                         )
@@ -119,7 +130,8 @@ class CollectPrChangesTest {
                             "[\n" +
                                     "  {\n" +
                                     "    \"filename\": \"src/main/kotlin/Main3.kt\",\n" +
-                                    "    \"status\": \"added\"\n" +
+                                    "    \"status\": \"added\",\n" +
+                                    "    \"patch\": \"@@ -0,0 +1,8 @@\nblah blah\"" +
                                     "  }\n" +
                                     "]"
                         )
@@ -140,7 +152,12 @@ class CollectPrChangesTest {
 
         assertAll(
             { assertThat(result, equalTo(0))},
-            { assertThat(File("collection-report.txt").readText(), equalTo("src/main/kotlin/Main.kt src/main/kotlin/Main2.kt src/main/kotlin/Main3.kt"))}
+            {
+                assertThat(
+                    File("collection-report.txt").readText(),
+                    equalTo("src/main/kotlin/Main.kt 1,8\nsrc/main/kotlin/Main2.kt 1,8\nsrc/main/kotlin/Main3.kt 1,8")
+                )
+            }
         )
     }
 
@@ -153,19 +170,23 @@ class CollectPrChangesTest {
                             "[\n" +
                                     "  {\n" +
                                     "    \"filename\": \"src/main/kotlin/Main.kt\",\n" +
-                                    "    \"status\": \"added\"\n" +
+                                    "    \"status\": \"added\",\n" +
+                                    "    \"patch\": \"@@ -0,0 +1,8 @@\nblah blah\"" +
                                     "  },\n" +
                                     "  {\n" +
                                     "    \"filename\": \"src/main/kotlin/Main2.kt\",\n" +
-                                    "    \"status\": \"removed\"\n" +
+                                    "    \"status\": \"removed\",\n" +
+                                    "    \"patch\": \"@@ -0,0 +1,8 @@\nblah blah\"" +
                                     "  },\n" +
                                     "  {\n" +
                                     "    \"filename\": \"src/main/kotlin/Main3.kt\",\n" +
-                                    "    \"status\": \"added\"\n" +
+                                    "    \"status\": \"added\",\n" +
+                                    "    \"patch\": \"@@ -0,0 +1,8 @@\nblah blah\"" +
                                     "  },\n" +
                                     "  {\n" +
                                     "    \"filename\": \"src/main/kotlin/Main4.kt\",\n" +
-                                    "    \"status\": \"modified\"\n" +
+                                    "    \"status\": \"modified\",\n" +
+                                    "    \"patch\": \"@@ -0,0 +1,8 @@\nblah blah\"" +
                                     "  }\n" +
                                     "]"
                         )
@@ -186,7 +207,12 @@ class CollectPrChangesTest {
 
         assertAll(
             { assertThat(result, equalTo(0))},
-            { assertThat(File("collection-report.txt").readText(), equalTo("src/main/kotlin/Main.kt src/main/kotlin/Main3.kt src/main/kotlin/Main4.kt"))}
+            {
+                assertThat(
+                    File("collection-report.txt").readText(),
+                    equalTo("src/main/kotlin/Main.kt 1,8\nsrc/main/kotlin/Main3.kt 1,8\nsrc/main/kotlin/Main4.kt 1,8")
+                )
+            }
         )
     }
 
@@ -224,11 +250,13 @@ class CollectPrChangesTest {
                             "[\n" +
                                     "  {\n" +
                                     "    \"filename\": \"src/main/kotlin/Dockerfile\",\n" +
-                                    "    \"status\": \"added\"\n" +
+                                    "    \"status\": \"added\",\n" +
+                                    "    \"patch\": \"@@ -0,0 +1,8 @@\nblah blah\"" +
                                     "  },\n" +
                                     "  {\n" +
                                     "    \"filename\": \"src/main/kotlin/action.yml\",\n" +
-                                    "    \"status\": \"added\"\n" +
+                                    "    \"status\": \"added\",\n" +
+                                    "    \"patch\": \"@@ -0,0 +1,8 @@\nblah blah\"" +
                                     "  }\n" +
                                     "]"
                         )
@@ -262,7 +290,7 @@ class CollectPrChangesTest {
         assertThat(result, equalTo(-1))
     }
 
-    @Test fun `when there is an error while getting the changes from github it returns the error's message`() {
+    @Test fun `when there is an error while getting the changes from github it exits with code -1`() {
         mockWebServer.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 return when (request.path) {
