@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
 class MakePrCommentsTest {
-    @Test fun `all ktlint errors are being used to make comments in the pr`() {
+    @Test fun `only the ktlint errors that their line is part of the diff are being used to make comments in the PR`() {
         mockWebServer.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 return when (request.path) {
@@ -33,10 +33,11 @@ class MakePrCommentsTest {
         makePrComments(arrayOf(pathToEventFile, token), mockWebServer.url("/"), pathToRelativePaths, pathToKtlintReport)
 
         assertAll(
-            assertComment("{\"body\":\"Incorrect modifier order (should be \\\"public abstract\\\")\",\"commit_id\":\"31017d4c19c5a69ac8d5327748cdde2514dba220\",\"path\":\"src/main/kotlin/ConsinstentOrder.kt\",\"line\":5,\"side\":\"RIGHT\"}"),
-            assertComment("{\"body\":\"Incorrect modifier order (should be \\\"internal open suspend\\\")\",\"commit_id\":\"31017d4c19c5a69ac8d5327748cdde2514dba220\",\"path\":\"src/main/kotlin/ConsinstentOrder.kt\",\"line\":7,\"side\":\"RIGHT\"}"),
-            assertComment("{\"body\":\"Incorrect modifier order (should be \\\"public override\\\")\",\"commit_id\":\"31017d4c19c5a69ac8d5327748cdde2514dba220\",\"path\":\"src/main/kotlin/ConsinstentOrder.kt\",\"line\":13,\"side\":\"RIGHT\"}"),
-            assertComment("{\"body\":\"Unnecessary block (\\\"{}\\\")\",\"commit_id\":\"31017d4c19c5a69ac8d5327748cdde2514dba220\",\"path\":\"src/main/kotlin/ConsistentSpacing.kt\",\"line\":15,\"side\":\"RIGHT\"}")
+            assertComment("{\"body\":\"Incorrect modifier order (should be \\\"public abstract\\\")\",\"commit_id\":\"31017d4c19c5a69ac8d5327748cdde2514dba220\",\"path\":\"src/main/kotlin/ConsinstentOrder.kt\",\"line\":18,\"side\":\"RIGHT\"}"),
+            assertComment("{\"body\":\"Incorrect modifier order (should be \\\"internal open suspend\\\")\",\"commit_id\":\"31017d4c19c5a69ac8d5327748cdde2514dba220\",\"path\":\"src/main/kotlin/ConsinstentOrder.kt\",\"line\":97,\"side\":\"RIGHT\"}"),
+            assertComment("{\"body\":\"Incorrect modifier order (should be \\\"public override\\\")\",\"commit_id\":\"31017d4c19c5a69ac8d5327748cdde2514dba220\",\"path\":\"src/main/kotlin/ConsinstentOrder.kt\",\"line\":208,\"side\":\"RIGHT\"}"),
+            assertComment("{\"body\":\"Unnecessary block (\\\"{}\\\")\",\"commit_id\":\"31017d4c19c5a69ac8d5327748cdde2514dba220\",\"path\":\"src/main/kotlin/ConsistentSpacing.kt\",\"line\":15,\"side\":\"RIGHT\"}"),
+            assertComment("{\"body\":\"Unnecessary block (\\\"{}\\\")\",\"commit_id\":\"31017d4c19c5a69ac8d5327748cdde2514dba220\",\"path\":\"src/main/kotlin/ConsistentSpacing.kt\",\"line\":22,\"side\":\"RIGHT\"}")
         )
     }
 

@@ -30,7 +30,7 @@ echo ''
 
 echo 'Running ktlint...'
 echo "::debug::$COLLECTION_REPORT=$(cat $COLLECTION_REPORT)"
-./ktlint $(cat $COLLECTION_REPORT) --reporter=json,output=$KTLINT_REPORT
+./ktlint $(cat $COLLECTION_REPORT | awk 'BEGIN { ORS=" " }; {print $1}') --reporter=json,output=$KTLINT_REPORT
 echo "::debug::$KTLINT_REPORT=$(cat $KTLINT_REPORT)"
 
 if [ "$(cat $KTLINT_REPORT)" = "$EMPTY_KTLINT_REPORT" ]; then

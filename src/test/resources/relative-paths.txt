@@ -1,1 +1,2 @@
-src/main/kotlin/ConsinstentOrder.kt src/main/kotlin/ConsistentSpacing.kt
+src/main/kotlin/ConsinstentOrder.kt 15,6 96,7 205,6
+src/main/kotlin/ConsistentSpacing.kt 15,8

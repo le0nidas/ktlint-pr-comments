@@ -28,13 +28,17 @@ fun makePrComments(
         .build()
 
     return try {
-        val relativePathsOfChangedFiles =
-            loadRelativePathsOfChangedFiles(collectionReportPath)
+        val allChanges = loadChanges(collectionReportPath)
         val report = createKtlintReport(ktlintReportPath, moshi)
         val event = createGithubEvent(args[Common.ARGS_INDEX_EVENT_FILE_PATH], moshi)
-        val comments = convertKtlintReportToGithubPrComments(report, event, relativePathsOfChangedFiles)
+        val comments = convertKtlintReportToGithubPrComments(report, event, allChanges.map { it.name })
+        val commentsInDiff = comments
+            .filter { comment ->
+                val fileChanges = allChanges.first { change -> change.name == comment.path }
+                comment.line in fileChanges
+            }
         val token = args[Common.ARGS_INDEX_TOKEN]
-        makeComments(comments, token, event, retrofit)
+        makeComments(commentsInDiff, token, event, retrofit)
 
         Common.EXIT_CODE_SUCCESS
     } catch (ex: Throwable) {
@@ -46,16 +50,39 @@ fun makePrComments(
     }
 }
 
-fun loadRelativePathsOfChangedFiles(
+// changes in files:
+fun loadChanges(
     pathToFileWithRelativePaths: String
-): List<String> {
+): List<FileChanges> {
 
     debug("fun loadRelativePathsOfChangedFiles: pathToFileWithRelativePaths=$pathToFileWithRelativePaths")
 
     return File(pathToFileWithRelativePaths)
         .readText()
-        .split(" ")
+        .split("\n")
+        .map { line ->
+            val lineParts = line.split(" ")
+            val fileName = lineParts.first()
+            val patchedAreas = lineParts.subList(1, lineParts.size)
+                .map { patch ->
+                    val patchAsInt = patch.split(",").map { it.toInt() }
+                    patchAsInt[0] until patchAsInt[0] + patchAsInt[1]
+                }
+            Pair(fileName, patchedAreas)
+        }
+        .map { FileChanges(it.first, it.second) }
 }
+
+data class FileChanges(
+    val name: String,
+    private val patchedAreas: List<IntRange>
+) {
+
+    operator fun contains(line: Int): Boolean {
+        return patchedAreas.any { area -> line in area }
+    }
+}
+// -----------------
 
 // extract ktlint errors:
 fun createKtlintReport(
@@ -73,7 +100,7 @@ fun createKtlintReport(
 class KtlintError(val line: Int, val message: String)
 class KtlintFileErrors(val file: String, val errors: List<KtlintError>)
 class KtlintReport(val errors: List<KtlintFileErrors>)
-//------------------------
+// ----------------------
 
 // make comment for the PR to github:
 fun makeComments(
@@ -119,7 +146,7 @@ data class GithubPrComment(
 )
 
 class GithubPrCommentResponse(val url: String)
-//------------------------------------
+// ----------------------------------
 
 // helping functions:
 fun convertKtlintReportToGithubPrComments(
@@ -140,4 +167,4 @@ fun convertKtlintReportToGithubPrComments(
             }
         }
 }
-//--------------------
+// -------------------
