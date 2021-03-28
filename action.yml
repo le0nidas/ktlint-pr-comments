@@ -15,3 +15,7 @@ inputs:
   repotoken:
     description: A token that grands access to read/write actions. Usually secrets.GITHUB_TOKEN.
     required: true
+
+  disabledrules:
+    description: Comma separated list of rules to disable
+    required: false
