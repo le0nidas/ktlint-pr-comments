@@ -16,6 +16,6 @@ inputs:
     description: A token that grands access to read/write actions. Usually secrets.GITHUB_TOKEN.
     required: true
 
-  disabledrules:
-    description: Comma separated list of rules to disable
+  arguments:
+    description: Arguments to pass to ktlint. Note you cannot set your own --reporter argument, it will be ignored
     required: false
