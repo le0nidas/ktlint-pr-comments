@@ -51,3 +51,8 @@ echo 'Make comments in PR...'
 ./executeMakePrComments $GITHUB_EVENT_PATH $INPUT_REPOTOKEN
 echo '----------------------'
 echo ''
+
+if [ $INPUT_FAILONCOMMENTS == "yes" ]; then
+    echo 'Fail on comments is enabled'
+    exit -1
+fi
