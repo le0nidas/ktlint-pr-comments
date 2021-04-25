@@ -34,7 +34,7 @@ echo "::debug::INPUT_ARGUMENTS=$INPUT_ARGUMENTS"
 
 echo 'Running ktlint...'
 echo "::debug::$COLLECTION_REPORT=$(cat $COLLECTION_REPORT)"
-./ktlint $(cat $COLLECTION_REPORT | awk 'BEGIN { ORS=" " }; {print $1}') --reporter=json,output=$KTLINT_REPORT
+./ktlint $(cat $COLLECTION_REPORT | awk 'BEGIN { ORS=" " }; {print $1}') --reporter=json,output=$KTLINT_REPORT $INPUT_ARGUMENTS
 
 echo "::debug::$KTLINT_REPORT=$(cat $KTLINT_REPORT)"
 
