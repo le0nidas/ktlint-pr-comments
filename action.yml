@@ -19,3 +19,8 @@ inputs:
   arguments:
     description: Arguments to pass to ktlint. Note you cannot set your own --reporter argument, it will be ignored
     required: false
+
+  failOnComments:
+    description: If true it will exit with failure if there are any comments
+    required: false
+    default: 'no'
