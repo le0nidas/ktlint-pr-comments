@@ -28,9 +28,10 @@ echo '------------------------'
 echo ''
 
 
-echo 'Running ktlint...'
 # Strip out any --reporter arguments supplied by the user
-INPUT_ARGUMENTS = $INPUT_ARGUMENTS#--reporter*[[:space:]]
+INPUT_ARGUMENTS=${INPUT_ARGUMENTS/--reporter*[[:space:]]/}
+
+echo 'Running ktlint...'
 echo "::debug::$COLLECTION_REPORT=$(cat $COLLECTION_REPORT)"
 ./ktlint $(cat $COLLECTION_REPORT | awk 'BEGIN { ORS=" " }; {print $1}') --reporter=json,output=$KTLINT_REPORT $INPUT_ARGUMENTS
 
