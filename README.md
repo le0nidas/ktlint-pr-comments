@@ -1,4 +1,4 @@
-# Ktlint PR comments v1.1
+# Ktlint PR comments v1.2
 
 This action runs [ktlint](https://ktlint.github.io/) against all `.kt` files that were changed in a PR
 and makes a line comment for every error that ktlint found.
